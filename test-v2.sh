@@ -169,7 +169,7 @@ fi
 ######################################
 
 mkdir -p ../emptyrepo && cd ../emptyrepo
-if ../../minigit init >/dev/null 2>&1 && ../../minigit log 2>&1 | grep -q "No commits"; then
+if ../minigit init >/dev/null 2>&1 && ../minigit log 2>&1 | grep -q "No commits"; then
   pass "log with no commits"
 else
   fail "log with no commits"
