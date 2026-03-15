@@ -51,12 +51,16 @@ artifacts/
 ruby benchmark.rb                                    # All languages x 3 trials (default: claude)
 ruby benchmark.rb --lang python --trials 1           # Single language test
 ruby benchmark.rb --codex gemini --lang ruby         # Use Gemini instead of Claude
+ruby benchmark.rb --codex gemini --problem minigit   # Writes to artifacts/gemini/minigit/
 ruby benchmark.rb --trials 10 --start 11             # Trials 11-20
 ruby benchmark.rb --dry-run                          # Dry run
 ruby benchmark.rb --help                             # Show all options
 ruby report.rb                                       # Generate report
 python3 plot.py                                      # Generate graphs
+bash scripts/run-all.sh gemini minigit --lang python --trials 1
 ```
+
+Prefer `config/codexes.local.yml` for local secrets and enablement overrides.
 
 ## Multi-Codex Architecture
 
@@ -89,6 +93,15 @@ To add a new codex:
 rust, go, c, typescript, javascript, java, perl, python, python/mypy, ruby, ruby/steep, lua, scheme, ocaml, haskell
 
 To add a language, add an entry to the `LANGUAGES` hash. Tests just call `./minigit`, so the implementation only needs to produce an executable with that name.
+
+## Problem Model
+
+Problems are loaded from `problems/<problem>/problem.json` and currently assume a two-phase structure:
+
+- `v1_spec`, `v1_test`, `v1_prompt`
+- `v2_spec`, `v2_test`, `v2_prompt`
+
+Each run writes outputs under `artifacts/<codex>/<problem>/`, while dry-runs are isolated under `artifacts/<codex>/<problem>/dry-run/`.
 
 ## MiniGit Technical Notes
 

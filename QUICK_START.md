@@ -1,191 +1,232 @@
-# Quick Start Guide
+# Quick Start
 
-## Multi-Codex AI Coding Language Benchmark
+This guide is for getting from **fresh checkout** to **first working benchmark run** with the least confusion.
 
-This benchmark tests different AI coding assistants on the same task across multiple programming languages.
+## Before you begin
 
-## Prerequisites
+You need:
 
-1. **Ruby** (for running the benchmark)
-2. **Target language toolchains** (for the languages you want to test)
-3. **AI Codex** (at least one):
-   - Claude Code CLI (`claude`)
-   - Google Gemini API key
+1. **Ruby**
+2. the toolchains for the languages you want to run
+3. at least one configured codex
 
-## Setup
+Examples:
 
-### 1. Clone the repository
+- Claude Code CLI for `claude`
+- a Gemini API key for `gemini`
+
+## Step 1: work from the repository root
+
+Run all commands below from the repository root:
 
 ```bash
-cd /home/seyyah/works/engiz/ai-coding-lang-bench
+pwd
 ```
 
-### 2. Configure AI Codexes
+You should be inside the cloned `ai-coding-lang-bench` directory.
 
-#### Option A: Using Claude Code (Default)
+## Step 2: configure a codex
 
-Install Claude Code CLI:
-```bash
-# Follow instructions at https://docs.anthropic.com/en/docs/claude-code
-```
+### Recommended pattern: use `config/codexes.local.yml`
 
-Claude is enabled by default, no additional configuration needed.
-
-#### Option B: Using Google Gemini
-
-1. Get an API key from https://ai.google.dev/
-2. Set the environment variable:
-   ```bash
-   export GOOGLE_API_KEY="your-api-key-here"
-   ```
-3. Enable Gemini in `config/codexes.yml`:
-   ```yaml
-   gemini:
-     enabled: true  # Change from false to true
-   ```
-
-#### Option C: Using Both (Local Config)
+Do **not** put secrets or local enablement changes in the shared config if you can avoid it.
 
 Create `config/codexes.local.yml`:
+
 ```yaml
 codexes:
   gemini:
     enabled: true
     config:
-      api_key: "your-actual-api-key"
+      api_key: "${GOOGLE_API_KEY}"
 ```
 
-This file is gitignored and won't be committed.
-
-## Running the Benchmark
-
-### Quick Test (1 trial, 1 language)
+Then export your key:
 
 ```bash
-# Claude
-ruby benchmark.rb --lang python --trials 1
-
-# Gemini
-ruby benchmark.rb --codex gemini --lang python --trials 1
+export GOOGLE_API_KEY="your-api-key"
 ```
 
-### Full Benchmark (Default: 3 trials, all languages)
+This local file is gitignored.
+
+### Claude Code
+
+`claude` is enabled by default in `config/codexes.yml`, so if the CLI is already installed and authenticated, you can use it immediately.
+
+### Gemini
+
+If Gemini says it is not enabled, create the local override above instead of editing the shared config.
+
+## Step 3: run a safe dry-run first
+
+Recommended:
 
 ```bash
-ruby benchmark.rb
+bash scripts/run-all.sh gemini minigit --dry-run --lang python --trials 1
 ```
 
-### Compare Multiple Languages
+This checks the full pipeline without making a paid API call:
+
+- benchmark orchestration
+- problem loading
+- namespaced outputs
+- report generation
+- figure generation
+
+Dry-run artifacts go to:
+
+```text
+artifacts/<codex>/<problem>/dry-run/
+```
+
+## Step 4: run your first real benchmark
+
+### Single codex, single problem, single language
 
 ```bash
-ruby benchmark.rb --lang python,ruby,javascript --trials 5
+bash scripts/run-all.sh gemini minigit --lang python --trials 1
 ```
 
-### Compare Codexes
+### With Claude
 
 ```bash
-# Run Claude
-ruby benchmark.rb --codex claude --lang python --trials 3
-
-# Run Gemini
-ruby benchmark.rb --codex gemini --lang python --trials 3
+bash scripts/run-all.sh claude minigit --lang python --trials 1
 ```
 
-### Dry Run (Test without actually running AI)
+## Step 5: inspect the outputs
+
+After a real run, the canonical outputs live under:
+
+```text
+artifacts/<codex>/<problem>/
+  generated/
+  logs/
+  results/
+  figures/
+```
+
+Most useful files:
+
+- `results/results.json` — raw benchmark records
+- `results/meta.json` — environment and version metadata
+- `results/report.md` — generated markdown report
+- `figures/` — PNG graphs
+
+## Common workflows
+
+### Compare two codexes on the same problem/language
 
 ```bash
-ruby benchmark.rb --dry-run --lang python
+bash scripts/run-all.sh claude minigit --lang python --trials 3
+bash scripts/run-all.sh gemini minigit --lang python --trials 3
 ```
 
-## Understanding Results
+### Compare several languages with one codex
 
-After running with the helper scripts, outputs are saved under:
-- `artifacts/<codex>/<problem>/results/results.json` - Raw data
-- `artifacts/<codex>/<problem>/results/meta.json` - Metadata (codex version, timestamps, etc.)
-- `artifacts/<codex>/<problem>/logs/` - Detailed logs from each trial
-
-Generate reports:
 ```bash
-bash scripts/generate-report.sh gemini minigit
-bash scripts/generate-figures.sh gemini minigit
+bash scripts/run-all.sh gemini minigit --lang python,ruby,javascript --trials 3
 ```
 
-## Available Options
+### Continue with later trial numbers
+
+```bash
+bash scripts/run-all.sh gemini minigit --lang python --trials 5 --start 6
+```
+
+### Use the raw runner directly
+
+```bash
+ruby benchmark.rb --codex gemini --problem minigit --lang python --trials 1
+```
+
+`benchmark.rb` now defaults to the same namespaced artifact layout as the helper scripts.
+
+## How to choose between helper scripts and raw commands
+
+### Prefer helper scripts when you want
+
+- a clean default path layout
+- report generation after the run
+- figures after the run
+
+### Prefer raw commands when you want
+
+- tighter control
+- custom automation
+- to generate only one part of the pipeline
+
+Useful raw commands:
 
 ```bash
 ruby benchmark.rb --help
+ruby report.rb --help
+python3 plot.py --help
 ```
 
-- `--lang, -l LANGS` - Comma-separated languages (e.g., `python,ruby,go`)
-- `--trials, -t NUM` - Number of trials per language
-- `--start, -s NUM` - Starting trial number (for continuation)
-- `--codex, -c NAME` - AI codex to use (`claude`, `gemini`)
-- `--dry-run` - Test run without executing AI
-- `--help, -h` - Show help
+## Supported language groups
 
-## Supported Languages
+- Dynamic: `python`, `ruby`, `javascript`, `perl`, `lua`
+- Static: `rust`, `go`, `c`, `typescript`, `java`
+- Functional: `scheme`, `ocaml`, `haskell`
+- Typed variants: `python/mypy`, `ruby/steep`
 
-- **Dynamic**: python, ruby, javascript, perl, lua
-- **Static**: typescript, go, rust, c, java
-- **Functional**: scheme, ocaml, haskell
-- **With Type Checkers**: python/mypy, ruby/steep
+## Adding things later
+
+### Add a new problem
+
+Create:
+
+```text
+problems/<problem>/
+  problem.json
+  SPEC-v1.txt
+  SPEC-v2.txt
+  test-v1.sh
+  test-v2.sh
+```
+
+### Add a new codex
+
+1. Create an adapter in `lib/codexes/`
+2. Extend `BaseCodex`
+3. Add config/template entry in `config/codexes.yml`
+4. Enable it locally in `config/codexes.local.yml`
+
+### Add a new language
+
+Edit the `LANGUAGES` hash in `benchmark.rb`.
 
 ## Troubleshooting
 
-### "Codex 'gemini' is not enabled"
-Enable Gemini in `config/codexes.yml` or create `config/codexes.local.yml`.
+### “Codex 'gemini' is not enabled”
 
-### "GOOGLE_API_KEY not configured"
-Set the environment variable:
+Create or fix `config/codexes.local.yml`.
+
+### “GOOGLE_API_KEY not configured”
+
+Export it before running:
+
 ```bash
 export GOOGLE_API_KEY="your-key"
 ```
 
-### Tests fail
-Ensure the target language toolchain is installed:
+### “Unknown language”
+
+Check the exact keys listed in `benchmark.rb --help` or in the `LANGUAGES` hash.
+
+### Tests fail immediately
+
+Check that the target toolchain exists:
+
 ```bash
 python3 --version
 ruby --version
 node --version
-# etc.
+gcc --version
 ```
 
-## Adding a New Codex
+## Where to go next
 
-1. Create `lib/codexes/my_codex.rb` extending `BaseCodex`
-2. Implement required methods:
-   - `run_generation(prompt, dir:, log_path:)`
-   - `version`
-   - `parse_metrics(raw_output)` (optional)
-3. Add to `config/codexes.yml`:
-   ```yaml
-   my_codex:
-     enabled: true
-     class: MyCodex
-     config:
-       api_key: "${MY_API_KEY}"
-   ```
-4. Run: `ruby benchmark.rb --codex my_codex`
-
-## Examples
-
-```bash
-# Compare Python vs Ruby with Claude
-ruby benchmark.rb --lang python,ruby --trials 10
-
-# Compare Claude vs Gemini on Python
-ruby benchmark.rb --codex claude --lang python --trials 5
-ruby benchmark.rb --codex gemini --lang python --trials 5
-
-# Test static vs dynamic languages
-ruby benchmark.rb --lang python,typescript --trials 5
-
-# Run subset of languages (4-15)
-ruby benchmark.rb --trials 12 --start 4
-```
-
-## Next Steps
-
-- Check `CLAUDE.md` for detailed technical documentation
-- See `README.md` for benchmark results and analysis
-- Explore `lib/codexes/` to see adapter implementations
+- Overview and architecture: [README.md](./README.md)
+- Documentation map: [INDEX.md](./INDEX.md)
+- Technical internals: [CLAUDE.md](./CLAUDE.md)

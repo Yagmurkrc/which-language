@@ -12,9 +12,6 @@ require_relative 'lib/codex_loader'
 
 BASE_DIR = File.expand_path(__dir__)
 PROBLEMS_DIR = File.join(BASE_DIR, 'problems')
-DEFAULT_WORK_DIR = File.join(BASE_DIR, 'generated')
-DEFAULT_RESULTS_DIR = File.join(BASE_DIR, 'results')
-DEFAULT_LOGS_DIR    = File.join(BASE_DIR, 'logs')
 
 GO_DIR = File.join(Dir.home, '.local', 'go')
 NPM_PREFIX = File.join(Dir.home, '.local', 'npm')
@@ -42,6 +39,15 @@ LANGUAGES = {
 }
 
 TRIALS = 3
+
+def available_problem_keys
+  Dir.glob(File.join(PROBLEMS_DIR, '**', 'problem.json')).filter_map do |path|
+    relative = path.delete_prefix("#{PROBLEMS_DIR}/")
+    next if relative == 'problem.json'
+
+    File.dirname(relative)
+  end.sort
+end
 
 # ---------------------------------------------------------------------------
 # CLI args
@@ -80,6 +86,7 @@ while i < ARGV.length
     dry_run = true
     i += 1
   when '--help', '-h'
+    available_problems = available_problem_keys
     puts <<~HELP
       Usage: ruby benchmark.rb [OPTIONS]
 
@@ -88,7 +95,7 @@ while i < ARGV.length
         --trials, -t NUM       Number of trials per language (default: #{TRIALS})
         --start, -s NUM        Starting trial number (default: 1)
         --codex, -c NAME       AI codex to use: #{CodexLoader.available_codexes.join(', ')} (default: #{CodexLoader.default_codex})
-        --problem, -p NAME     Problem key under problems/ (default: minigit)
+        --problem, -p NAME     Problem key under problems/ (default: minigit#{available_problems.empty? ? '' : "; available: #{available_problems.join(', ')}"})
         --output-root PATH     Write generated/, logs/, and results/ under PATH
         --dry-run              Dry run mode (don't actually run codex)
         --help, -h             Show this help message
@@ -97,11 +104,17 @@ while i < ARGV.length
         ruby benchmark.rb --lang python --trials 1
         ruby benchmark.rb --codex gemini --lang ruby,python
         ruby benchmark.rb --codex gemini --problem minigit
+        ruby benchmark.rb --codex claude --problem minigit --lang python --dry-run
         ruby benchmark.rb --trials 10 --start 11
+
+      By default, outputs are written under:
+        artifacts/<codex>/<problem>/
+      or, for dry runs:
+        artifacts/<codex>/<problem>/dry-run/
     HELP
     exit 0
   else
-    i += 1
+    abort "Unknown option: #{ARGV[i]}\nRun `ruby benchmark.rb --help` for usage."
   end
 end
 
@@ -109,17 +122,33 @@ languages_to_run = selected_languages || LANGUAGES.keys
 selected_codex ||= CodexLoader.default_codex
 problem = selected_problem || 'minigit'
 
+if selected_trials < 1
+  abort '--trials must be at least 1'
+end
+
+if selected_start < 1
+  abort '--start must be at least 1'
+end
+
+unknown_languages = languages_to_run.reject { |lang| LANGUAGES.key?(lang) }
+unless unknown_languages.empty?
+  abort <<~ERROR
+    Unknown language(s): #{unknown_languages.join(', ')}
+    Available languages: #{LANGUAGES.keys.join(', ')}
+  ERROR
+end
+
 if selected_output_root.nil?
   selected_output_root = if dry_run
                            File.join(BASE_DIR, 'artifacts', selected_codex, problem, 'dry-run')
-                         elsif selected_problem
+                         else
                            File.join(BASE_DIR, 'artifacts', selected_codex, problem)
                          end
 end
 
-work_dir = selected_output_root ? File.join(selected_output_root, 'generated') : DEFAULT_WORK_DIR
-results_dir = selected_output_root ? File.join(selected_output_root, 'results') : DEFAULT_RESULTS_DIR
-logs_dir = selected_output_root ? File.join(selected_output_root, 'logs') : DEFAULT_LOGS_DIR
+work_dir = File.join(selected_output_root, 'generated')
+results_dir = File.join(selected_output_root, 'results')
+logs_dir = File.join(selected_output_root, 'logs')
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -225,6 +254,7 @@ def load_problem_config(problem)
   config_path = File.join(problem_dir, 'problem.json')
 
   unless File.file?(config_path)
+    available = available_problem_keys
     abort <<~ERROR
       Problem config not found: #{config_path}
       Expected layout:
@@ -233,6 +263,7 @@ def load_problem_config(problem)
         problems/#{problem}/SPEC-v2.txt
         problems/#{problem}/test-v1.sh
         problems/#{problem}/test-v2.sh
+      #{available.empty? ? '' : "Available problems: #{available.join(', ')}"}
     ERROR
   end
 
