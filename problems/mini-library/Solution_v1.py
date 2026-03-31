@@ -1,6 +1,6 @@
 """
 mini-library v1 — While dongusu ile gelistirilmis versiyon
-Ogrenci: Ogrenci Adi (Ogrenci No)
+Ogrenci: Muhammed Mustafa Aydemir 251478095
  
 V1 Gorev Listesi:
   1. list komutu implemente edildi (while dongusu ile satir satir okuma)
