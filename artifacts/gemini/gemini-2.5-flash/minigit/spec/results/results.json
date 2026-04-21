@@ -12,11 +12,11 @@
     "v1_total_count": 11,
     "v1_loc": 257,
     "v2_time": 62.1,
-    "v2_pass": false,
-    "v2_passed_count": 0,
-    "v2_failed_count": 5,
-    "v2_total_count": 5,
-    "v2_loc": 1,
+    "v2_pass": true,
+    "v2_passed_count": 30,
+    "v2_failed_count": 0,
+    "v2_total_count": 30,
+    "v2_loc": 321,
     "v1_metrics": {
       "input_tokens": 894,
       "output_tokens": 3566,
@@ -32,6 +32,7 @@
       "cost_usd": 0.0104171,
       "model": "gemini-2.5-flash",
       "duration_ms": 62076
-    }
+    },
+    "_patched_note": "v2 metrics recomputed after base_codex.rb extractor fix (first-wins) — original run clobbered minigit with a trailing bash block; raw_response was intact."
   }
 ]
