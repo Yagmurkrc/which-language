@@ -8,6 +8,9 @@ Bu proje, komut satırı üzerinden çalışan basit bir not alma uygulamasıdı
 1. **Dil Güncellemesi:** Tüm kullanıcı mesajları ve hata bildirimleri Türkçeleştirilerek kullanım kolaylığı sağlandı.
 2. **Öncelik Sistemi:** Not oluştururken artık `Düşük`, `Orta` veya `Yüksek` gibi öncelik seviyeleri eklenebiliyor.
 3. **Veri Doğrulama:** Başlık veya içerik boş bırakıldığında uygulamanın hata vermesi ve kullanıcıyı uyarması sağlandı.
+4. **Dil Desteği:** Kullanıcı deneyimini artırmak amacıyla tüm hata ve bilgilendirme mesajları Türkçeleştirildi.
+5. **Yeni Veri Alanı:** Notlara "Öncelik" (Priority) özelliği eklendi. Artık notlar oluşturulurken önem seviyesi belirtilebiliyor.
+6. **Hata Denetimi:** Kullanıcının yanlışlıkla boş başlık veya içerik girmesini engelleyen bir kontrol mekanizması eklendi.
 
 ## Kurulum ve Kullanım
 Uygulamayı başlatmak için:
