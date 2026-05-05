@@ -17,7 +17,15 @@ V2 GÖREV LİSTESİ:
 1. 'list' komutunu ekle: Tüm notları döngü kullanarak alt alta listele.
 2. 'search' komutunu ekle: Kullanıcının girdiği kelimeyi not başlıklarında ara.
 3. 'filter' komutunu ekle: Sadece seçilen öncelik seviyesindeki (Düşük/Orta/Yüksek) notları göster.
+
 """
+V1 → V2 Değişiklik Özeti:
+
+Dinamik Listeleme: Statik yapıdan döngüsel yapıya geçildi; artık tüm notlar dosyadan okunup listelenebiliyor.
+
+Arama Kabiliyeti: Büyük/küçük harf duyarsız arama özelliği ile notlar arasında hızlı erişim sağlandı.
+
+Gelişmiş Filtreleme: Notlar, V1'de eklenen "Öncelik" seviyelerine göre süzülebilecek şekilde geliştirildi.
 
 ## Kurulum ve Kullanım
 Uygulamayı başlatmak için:
