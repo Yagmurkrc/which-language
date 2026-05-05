@@ -12,6 +12,13 @@ Bu proje, komut satırı üzerinden çalışan basit bir not alma uygulamasıdı
 5. **Yeni Veri Alanı:** Notlara "Öncelik" (Priority) özelliği eklendi. Artık notlar oluşturulurken önem seviyesi belirtilebiliyor.
 6. **Hata Denetimi:** Kullanıcının yanlışlıkla boş başlık veya içerik girmesini engelleyen bir kontrol mekanizması eklendi.
 
+"""
+V2 GÖREV LİSTESİ:
+1. 'list' komutunu ekle: Tüm notları döngü kullanarak alt alta listele.
+2. 'search' komutunu ekle: Kullanıcının girdiği kelimeyi not başlıklarında ara.
+3. 'filter' komutunu ekle: Sadece seçilen öncelik seviyesindeki (Düşük/Orta/Yüksek) notları göster.
+"""
+
 ## Kurulum ve Kullanım
 Uygulamayı başlatmak için:
 `python solution_v1.py init`
