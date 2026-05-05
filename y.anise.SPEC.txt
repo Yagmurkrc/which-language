@@ -38,6 +38,7 @@ Error: If no notes, print "No notes found."
 
 --- search ---
 Usage: python mininote.py search "keyword"
+The search operation is case-insensitive.
 Description: Searches for the keyword in titles and contents.
 Output: Shows matching notes in 'list' format.
 Error: If no match, print "No results for: <keyword>"
