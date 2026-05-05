@@ -5,16 +5,56 @@ Kapsam: Sadece init ve create komutlari.
 Yasaklar: Dongu (for/while) ve Liste ([]) kullanilmadi.
 """
 """
-V1 GÖREV LİSTESİ:
-1. Hata mesajlarını ve kullanıcı bilgilendirmelerini Türkçeleştir.
-2. 'create' komutuna 'Öncelik' (Priority) parametresi ekle.
-3. Not başlığı veya içeriği boş girilirse kullanıcıyı uyaracak bir kontrol ekle.
+
+V2 GÖREV LİSTESİ:
+1. 'list' komutunu ekle: Tüm notları döngü kullanarak alt alta listele.
+2. 'search' komutunu ekle: Kullanıcının girdiği kelimeyi not başlıklarında ara.
+3. 'filter' komutunu ekle: Seçilen önceliğe (Düşük/Orta/Yüksek) göre notları süz.
+
 """
 
 import sys
 import os
 
+def list_notes():
+    """Tüm notları döngü ile ekrana yazdırır."""
+    if not os.path.exists(".mininotes/notes.dat"):
+        return "Kayıtlı not bulunamadı."
+    
+    f = open(".mininotes/notes.dat", "r")
+    for line in f:
+        # Format: id|baslik|icerik|oncelik|tarih
+        parcalar = line.strip().split("|")
+        print(f"[{parcalar[0]}] {parcalar[1]} - Öncelik: {parcalar[3]}")
+    f.close()
+    return ""
 
+def search_notes(kelime):
+    """Notlar içinde arama yapar."""
+    f = open(".mininotes/notes.dat", "r")
+    bulundu = False
+    for line in f:
+        if kelime.lower() in line.lower():
+            parcalar = line.strip().split("|")
+            print(f"Eşleşme Bulundu: [{parcalar[0]}] {parcalar[1]}")
+            bulundu = True
+    f.close()
+    if not bulundu:
+        print(f"'{kelime}' içeren bir not bulunamadı.")
+
+def filter_notes(seviye):
+    """Önceliğe göre filtreleme yapar."""
+    f = open(".mininotes/notes.dat", "r")
+    bulundu = False
+    for line in f:
+        parcalar = line.strip().split("|")
+        if parcalar[3].lower() == seviye.lower():
+            print(f"[{parcalar[0]}] {parcalar[1]}")
+            bulundu = True
+    f.close()
+    if not bulundu:
+        print(f"{seviye} önceliğinde not bulunamadı.")
+        
 def initialize():
     """Not defteri klasörünü ve dosyasını oluşturur."""
     if os.path.exists(".mininotes"):
