@@ -43,6 +43,12 @@ Description: Searches for the keyword in titles and contents.
 Output: Shows matching notes in 'list' format.
 Error: If no match, print "No results for: <keyword>"
 
+--- filter ---
+Usage: python mininote.py filter "High"
+Description: Lists only the notes that match the specified priority.
+Output: Displays notes in 'list' format but filtered by priority level.
+Error: If no notes match the priority, print "No notes found with priority: <level>"
+
 --- delete ---
 Usage: python mininote.py delete 1
 Description: Removes the note with the given ID.
